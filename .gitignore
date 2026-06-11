@@ -1,0 +1,14 @@
+# 이 폴더를 Unity 프로젝트로 열어 .unitypackage 를 추출할 때 생기는 산출물만 무시.
+# SDK 소스(Assets/BBBase/**)는 추적한다.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+.vs/
+*.csproj
+*.sln
+*.unitypackage

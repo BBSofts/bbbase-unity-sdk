@@ -1,0 +1,24 @@
+{
+    "name": "BBBase.Runtime",
+    "rootNamespace": "BBBaseSdk",
+    "references": [
+        "Unity.Plugins.Newtonsoft.Json"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "BBBASE_HAS_NEWTONSOFT"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "",
+            "define": "BBBASE_HAS_NEWTONSOFT"
+        }
+    ],
+    "noEngineReferences": false
+}

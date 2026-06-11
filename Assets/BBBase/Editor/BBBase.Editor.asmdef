@@ -1,0 +1,26 @@
+{
+    "name": "BBBase.Editor",
+    "rootNamespace": "BBBaseSdk.Editor",
+    "references": [
+        "BBBase.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "BBBASE_HAS_NEWTONSOFT"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "",
+            "define": "BBBASE_HAS_NEWTONSOFT"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,21 @@
+{
+  "name": "io.bbbase.sdk",
+  "version": "1.0.0",
+  "displayName": "BBBase SDK",
+  "description": "BBBase BaaS official Unity SDK — guest/social login, record save/load (compareMode merge), leaderboards. async/await based.",
+  "unity": "2021.3",
+  "documentationUrl": "https://api.bbbase.io/quickstart/unity",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "keywords": [
+    "bbbase",
+    "baas",
+    "backend",
+    "leaderboard"
+  ],
+  "author": {
+    "name": "BBSofts",
+    "url": "https://bbbase.io"
+  }
+}
