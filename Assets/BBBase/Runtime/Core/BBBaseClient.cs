@@ -26,7 +26,7 @@ namespace BBBaseSdk
 
         /// <summary>프로젝트 스코프 경로(/projects/{pid}/...) 로 요청. 응답 data 를 T 로 역직렬화.</summary>
         public Task<T> SendProjectAsync<T>(string method, string subPath, object body = null, bool withUserToken = false)
-            => SendAsync<T>(method, $"/projects/{_settings.projectId}{subPath}", body, withUserToken);
+            => SendAsync<T>(method, $"/projects/{_settings.ActiveProjectId}{subPath}", body, withUserToken);
 
         /// <summary>임의 경로로 요청. data 가 필요 없으면 T 를 object 로 두고 결과를 무시한다.</summary>
         public async Task<T> SendAsync<T>(string method, string path, object body = null, bool withUserToken = false)
@@ -42,7 +42,7 @@ namespace BBBaseSdk
                 req.SetRequestHeader("Content-Type", "application/json");
             }
 
-            req.SetRequestHeader("X-API-Key", _settings.apiKey);
+            req.SetRequestHeader("X-API-Key", _settings.ActiveApiKey);
             if (withUserToken && !string.IsNullOrEmpty(AccessToken))
                 req.SetRequestHeader("Authorization", "Bearer " + AccessToken);
 

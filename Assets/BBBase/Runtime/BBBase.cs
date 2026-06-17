@@ -66,8 +66,8 @@ namespace BBBaseSdk
             Leaderboards = new BBBaseLeaderboards(_client);
 
             if (settings.verboseLogging)
-                Debug.Log($"[BBBase] initialized. project={settings.projectId}, " +
-                          $"restoredSession={_session.IsLoggedIn}");
+                Debug.Log($"[BBBase] initialized. env={settings.ActiveEnvironmentName}, " +
+                          $"project={settings.ActiveProjectId}, restoredSession={_session.IsLoggedIn}");
         }
     }
 }

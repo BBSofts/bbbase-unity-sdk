@@ -17,8 +17,10 @@ namespace BBBaseSdk.Editor
             DrawDefaultInspector();
 
             var s = (BBBaseSettings)target;
-            if (string.IsNullOrEmpty(s.projectId) || string.IsNullOrEmpty(s.apiKey))
-                EditorGUILayout.HelpBox("projectId / apiKey 가 비어 있습니다. 입력 전엔 로그인/호출이 실패합니다.",
+            if (string.IsNullOrEmpty(s.ActiveProjectId) || string.IsNullOrEmpty(s.ActiveApiKey))
+                EditorGUILayout.HelpBox(
+                    $"현재 환경({s.ActiveEnvironmentName})의 projectId / apiKey 가 비어 있습니다. " +
+                    "입력 전엔 로그인/호출이 실패합니다.",
                     MessageType.Warning);
 
             EditorGUILayout.Space();

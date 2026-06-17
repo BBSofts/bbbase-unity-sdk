@@ -1,6 +1,6 @@
 {
   "name": "io.bbbase.sdk",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "displayName": "BBBase SDK",
   "description": "BBBase BaaS official Unity SDK — guest/social login, record save/load (compareMode merge), leaderboards. async/await based.",
   "unity": "2021.3",

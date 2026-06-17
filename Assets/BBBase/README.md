@@ -6,8 +6,14 @@ BBBase BaaS 공식 Unity SDK. 게스트/소셜 로그인, 레코드 저장·조�
 ## 설치
 
 1. `BBBase.unitypackage` 임포트 (Assets ▸ Import Package ▸ Custom Package).
-2. 메뉴 **BBBase ▸ Settings** → `Resources/BBBaseSettings.asset` 생성 → 인스펙터에
-   `baseUrl` / `projectId` / `apiKey` 입력 (대시보드 https://bbbase.io 에서 발급).
+2. 메뉴 **BBBase ▸ Settings** → `Resources/BBBaseSettings.asset` 생성 → 인스펙터에서
+   설정 입력 (대시보드 https://bbbase.io 에서 발급).
+   - **개발용/라이브용은 BBBase 에서 각각 별도 프로젝트**로 만들어 `projectId`/`apiKey`
+     쌍이 두 개 나온다. `개발용 프로젝트`/`라이브용 프로젝트` 그룹에 각각 채운다
+     (같은 서버라 `baseUrl` 은 공통, 보통 그대로 둔다).
+   - `Environment` 는 기본 `Auto` — 에디터/Development Build 는 개발용, 릴리스 빌드는
+     라이브용 프로젝트를 자동 사용한다. 강제로 고정하려면 `Development`/`Production` 선택.
+   - 프로젝트가 하나뿐이면 `Legacy (단일 환경)` 그룹의 `projectId`/`apiKey` 만 채워도 된다.
 
 > **의존성(Newtonsoft Json)은 자동 설치된다.** 임포트 직후 SDK 의 에디터 부트스트랩이
 > `com.unity.nuget.newtonsoft-json` 이 없으면 자동으로 추가한다(콘솔에 설치 로그가 찍힌다).
