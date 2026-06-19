@@ -1,8 +1,8 @@
 {
   "name": "io.bbbase.sdk",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "displayName": "BBBase SDK",
-  "description": "BBBase BaaS official Unity SDK — guest/social login, record save/load (compareMode merge), leaderboards. async/await based.",
+  "description": "BBBase BaaS official Unity SDK — guest/social login, record save/load (compareMode merge), leaderboards, leagues (tier promotion/demotion). async/await based.",
   "unity": "2021.3",
   "documentationUrl": "https://api.bbbase.io/quickstart/unity",
   "dependencies": {

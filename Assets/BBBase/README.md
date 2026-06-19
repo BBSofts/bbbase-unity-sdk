@@ -38,6 +38,10 @@ async void Start()
     await BBBase.Records.SaveMineAsync(new { best_time = 4.35, stars = 120 });
     var me  = await BBBase.Records.LoadMineAsync();                 // JObject (없으면 null)
     var top = await BBBase.Leaderboards.GetTopEntriesAsync("LB_ID", 10);
+
+    // 리그(티어 승격/강등): league_points 저장이 곧 점수 반영
+    await BBBase.Records.SaveMineAsync(new { league_points = 250 });
+    var st = await BBBase.Leagues.GetMyStatusAsync("LEAGUE_ID");    // st.Tier / Rank / Score
 }
 ```
 
