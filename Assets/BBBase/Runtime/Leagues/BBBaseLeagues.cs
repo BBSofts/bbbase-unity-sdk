@@ -30,6 +30,13 @@ namespace BBBaseSdk
         public Task<RankEntry[]> GetMyRanksAsync(string leagueId, int limit = 30, int offset = 0) =>
             GetRanksAsync(leagueId, RequireUserId(), limit, offset);
 
+        /// <summary>
+        /// 내 지난 사이클 결과(승급 연출)를 본 뒤 확인 처리(seen=true) — 다음 조회부터 안 뜨게.
+        /// 승급 애니메이션을 보여준 직후 호출한다.
+        /// </summary>
+        public Task<JObject> AcknowledgeResultAsync(string leagueId) =>
+            AcknowledgeResultAsync(leagueId, RequireUserId());
+
         // ── 범용 ──
 
         /// <summary>
@@ -65,6 +72,13 @@ namespace BBBaseSdk
             return await _client.SendProjectAsync<JToken>("GET", path);
         }
 
+        /// <summary>특정 엔티티의 지난 사이클 결과 확인 처리(seen=true). 결과가 없으면 no-op.</summary>
+        public async Task<JObject> AcknowledgeResultAsync(string leagueId, string entityId)
+        {
+            var path = $"/leagues/{Esc(leagueId)}/me/{Esc(entityId)}/ack";
+            return await _client.SendProjectAsync<JObject>("POST", path);
+        }
+
         private string RequireUserId()
         {
             if (!_session.IsLoggedIn)
@@ -88,5 +102,28 @@ namespace BBBaseSdk
         [JsonProperty("score")] public double Score;
         [JsonProperty("total")] public int Total;
         [JsonProperty("percentile")] public double Percentile;
+        /// <summary>지난 사이클 결과(승급/강등/순위). 없으면 null. 연출 후 AcknowledgeResultAsync 로 확인 처리.</summary>
+        [JsonProperty("lastResult")] public LeagueResult LastResult;
+    }
+
+    /// <summary>
+    /// 지난 승강 사이클 결과 스냅샷(승급 연출용). <see cref="Change"/> 는 "promote"/"demote"/"stay".
+    /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
+    public class LeagueResult
+    {
+        [JsonProperty("period")] public int Period;
+        [JsonProperty("tierFrom")] public int TierFrom;
+        [JsonProperty("tierTo")] public int TierTo;
+        [JsonProperty("change")] public string Change;   // promote / demote / stay
+        [JsonProperty("rank")] public int Rank;          // 마감 시 그룹 내 순위
+        [JsonProperty("groupSize")] public int GroupSize;
+        [JsonProperty("prevRank")] public int? PrevRank; // 직전 사이클 순위(없으면 null)
+        [JsonProperty("seen")] public bool Seen;
+
+        /// <summary>승급했는지(연출 트리거 편의).</summary>
+        public bool IsPromotion => Change == "promote";
+        /// <summary>강등됐는지.</summary>
+        public bool IsDemotion => Change == "demote";
     }
 }
