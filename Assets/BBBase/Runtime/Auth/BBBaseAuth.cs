@@ -74,57 +74,6 @@ namespace BBBaseSdk
             }
         }
 
-        // ── 계정 링킹 ────────────────────────────────────────────────
-        // 현재 로그인된 계정(userId 불변)에 로그인 수단을 추가한다. userId 가 바뀌지 않으므로
-        // 세이브(레코드)는 그대로 유지되고, 이후 그 수단으로 어느 기기에서든 같은 계정에 로그인할 수 있다.
-        // 모두 로그인 상태에서 호출해야 한다. 그 수단이 이미 다른 계정에 묶여 있으면
-        // BBBaseException(code=IDENTITY_ALREADY_LINKED, status=409) 가 던져진다.
-        // 상대 계정 id 는 ex.RawBody(JSON) 의 error.details.conflictUserId 에서 읽는다.
-
-        /// <summary>현재 계정에 게스트(다른 기기 등) 신원을 추가.</summary>
-        public Task<AccountInfo> LinkGuestAsync(string deviceId = null)
-        {
-            if (string.IsNullOrEmpty(deviceId)) deviceId = SystemInfo.deviceUniqueIdentifier;
-            return LinkAsync(new { provider = "GUEST", deviceId });
-        }
-
-        /// <summary>현재 게스트 계정에 구글 계정을 연동(가장 흔한 사용처).</summary>
-        public Task<AccountInfo> LinkGoogleAsync(string idToken)
-            => LinkAsync(new { provider = "GOOGLE", idToken });
-
-        /// <summary>현재 계정에 앱인토스를 연동.</summary>
-        public Task<AccountInfo> LinkAppsInTossAsync(string authorizationCode, string referrer = null)
-            => LinkAsync(referrer == null
-                ? (object)new { provider = "APPS_IN_TOSS", authorizationCode }
-                : new { provider = "APPS_IN_TOSS", authorizationCode, referrer });
-
-        private Task<AccountInfo> LinkAsync(object body)
-        {
-            EnsureLoggedIn();
-            return _client.SendProjectAsync<AccountInfo>("POST", "/auth/link", body, withUserToken: true);
-        }
-
-        /// <summary>링크 해제. provider: "GUEST" | "GOOGLE" | "APPS_IN_TOSS".
-        /// 마지막 남은 수단은 해제할 수 없다(CANNOT_UNLINK_LAST).</summary>
-        public Task<AccountInfo> UnlinkAsync(string provider)
-        {
-            EnsureLoggedIn();
-            return _client.SendProjectAsync<AccountInfo>("DELETE", $"/auth/link/{provider}", null, withUserToken: true);
-        }
-
-        /// <summary>내 계정 정보(userId, isGuest, providers).</summary>
-        public Task<AccountInfo> GetMeAsync()
-        {
-            EnsureLoggedIn();
-            return _client.SendProjectAsync<AccountInfo>("GET", "/auth/me", null, withUserToken: true);
-        }
-
-        private void EnsureLoggedIn()
-        {
-            if (!_session.IsLoggedIn)
-                throw new BBBaseException(BBBaseErrorCodes.NotLoggedIn, "로그인 후 호출하세요.", 0, false, "");
-        }
-
         private static string BuildBody(string field, string credential, object extra)
         {
             // extra 가 있으면 병합해 직렬화, 없으면 단일 필드만
@@ -143,16 +92,5 @@ namespace BBBaseSdk
         [JsonProperty("userId")] public string UserId;
         [JsonProperty("accessToken")] public string AccessToken;
         [JsonProperty("refreshToken")] public string RefreshToken;
-    }
-
-    /// <summary>계정 정보 — 링킹/언링크/GetMe 응답.</summary>
-    [JsonObject(MemberSerialization.OptIn)]
-    public class AccountInfo
-    {
-        [JsonProperty("userId")] public string UserId;
-        /// <summary>게스트 신원만 가진 계정(아직 소셜 미연동)이면 true.</summary>
-        [JsonProperty("isGuest")] public bool IsGuest;
-        /// <summary>연결된 로그인 수단 목록("GUEST"/"GOOGLE"/"APPS_IN_TOSS").</summary>
-        [JsonProperty("providers")] public string[] Providers;
     }
 }
