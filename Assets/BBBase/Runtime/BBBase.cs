@@ -26,6 +26,7 @@ namespace BBBaseSdk
         public static BBBaseLeaderboards Leaderboards { get; private set; }
         public static BBBaseLeagues Leagues { get; private set; }
         public static BBBaseMails Mails { get; private set; }
+        public static BBBaseLogs Logs { get; private set; }
 
         public static bool IsInitialized => _client != null;
 
@@ -68,6 +69,7 @@ namespace BBBaseSdk
             Leaderboards = new BBBaseLeaderboards(_client);
             Leagues = new BBBaseLeagues(_client, _session);
             Mails = new BBBaseMails(_client, _session);
+            Logs = new BBBaseLogs(_client);
 
             if (settings.verboseLogging)
                 Debug.Log($"[BBBase] initialized. env={settings.ActiveEnvironmentName}, " +
