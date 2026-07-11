@@ -17,6 +17,7 @@ namespace BBBaseSdk
         public const string DuplicateValue = "DUPLICATE_VALUE";
         public const string RecordNotFound = "RECORD_NOT_FOUND";
         public const string EntityRecordNotFound = "ENTITY_RECORD_NOT_FOUND";
+        public const string ConfigNotFound = "CONFIG_NOT_FOUND";
         public const string RateLimitExceeded = "RATE_LIMIT_EXCEEDED";
         public const string TooManyRequests = "TOO_MANY_REQUESTS";
         public const string LeaderboardScoreNotFound = "LEADERBOARD_SCORE_NOT_FOUND";
