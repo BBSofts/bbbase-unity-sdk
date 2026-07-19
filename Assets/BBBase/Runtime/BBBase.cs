@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace BBBaseSdk
@@ -28,6 +29,13 @@ namespace BBBaseSdk
         public static BBBaseMails Mails { get; private set; }
         public static BBBaseLogs Logs { get; private set; }
         public static BBBaseConfig Config { get; private set; }
+
+        /// <summary>
+        /// 액세스·리프레시 토큰이 모두 만료돼 SDK 가 세션을 자동 정리했을 때 방출.
+        /// 게임은 이 이벤트만 구독해 provider 별 재로그인 UI 를 띄우면 된다.
+        /// 평소 401(액세스 토큰 만료)은 SDK 가 조용히 refresh 하므로 게임이 신경 쓸 필요 없다.
+        /// </summary>
+        public static event Action<BBBaseProvider> SessionExpired;
 
         public static bool IsInitialized => _client != null;
 
@@ -66,6 +74,18 @@ namespace BBBaseSdk
             _session = new BBBaseSession(settings.persistSession);
             _client = new BBBaseClient(settings);
             Auth = new BBBaseAuth(_client, _session);
+            // 401 자동 refresh + 세션 만료 처리기를 client 에 주입
+            _client.SetAuthHandlers(
+                refreshHandler: async () =>
+                {
+                    try { await Auth.RefreshAsync(); return true; }
+                    catch { return false; }
+                },
+                sessionExpiredHandler: () =>
+                {
+                    var provider = Auth.HandleSessionExpired();
+                    SessionExpired?.Invoke(provider);
+                });
             Records = new BBBaseRecords(_client, _session);
             Leaderboards = new BBBaseLeaderboards(_client);
             Leagues = new BBBaseLeagues(_client, _session);

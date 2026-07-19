@@ -18,6 +18,11 @@ namespace BBBaseSdk.Samples
             BBBase.Init();
             if (!BBBase.IsInitialized) return;
 
+            // 0) 세션 만료 구독(선택이지만 권장). 액세스 토큰 만료(1시간)는 SDK 가 자동 refresh
+            //    하므로 게임이 신경 쓸 필요 없다. 리프레시 토큰까지 만료돼(오래 미접속) 자동
+            //    복구가 불가능할 때만 이 이벤트가 오며, 이때 provider 별 재로그인을 띄운다.
+            BBBase.SessionExpired += OnSessionExpired;
+
             try
             {
                 // 1) 게스트 로그인 (기기 식별자 자동). 구글이면 LoginGoogleAsync(idToken).
@@ -50,6 +55,20 @@ namespace BBBaseSdk.Samples
                     case BBBaseErrorCodes.RateLimitExceeded: Debug.LogWarning("호출 한도 초과 — 잠시 후 재시도"); break;
                     default: Debug.LogError($"BBBase 오류: {e.Code} / {e.Message}"); break;
                 }
+            }
+        }
+
+        /// <summary>세션이 완전히 만료돼 자동 복구가 불가능할 때 호출된다(재로그인 필요).</summary>
+        private async void OnSessionExpired(BBBaseProvider provider)
+        {
+            Debug.LogWarning($"세션 만료 — 재로그인 필요 (provider={provider})");
+            switch (provider)
+            {
+                case BBBaseProvider.Google: break;       // 구글 재인증 → LoginGoogleAsync(newIdToken)
+                case BBBaseProvider.AppsInToss: break;   // 앱인토스 재인증 → LoginAppsInTossAsync(code)
+                default:
+                    await BBBase.Auth.LoginGuestAsync();  // 게스트: 같은 기기면 같은 계정 복구
+                    break;
             }
         }
     }

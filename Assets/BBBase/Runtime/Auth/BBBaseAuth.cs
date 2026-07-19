@@ -61,6 +61,19 @@ namespace BBBaseSdk
             return data;
         }
 
+        /// <summary>
+        /// 액세스·리프레시 토큰이 모두 만료돼 자동 복구가 불가능할 때 클라이언트가 호출한다.
+        /// 로컬 세션(PlayerPrefs 포함)을 정리하고, 정리 직전의 provider 를 돌려줘 재로그인 UI
+        /// 분기에 쓰게 한다. 서버 refresh 토큰은 이미 만료/폐기 상태라 서버 호출은 하지 않는다.
+        /// </summary>
+        public BBBaseProvider HandleSessionExpired()
+        {
+            var provider = _session.Provider;
+            _session.Clear();
+            _client.AccessToken = null;
+            return provider;
+        }
+
         /// <summary>로그아웃 — 서버에 refresh 토큰 무효화 요청 후 로컬 세션 삭제.</summary>
         public async Task LogoutAsync()
         {
