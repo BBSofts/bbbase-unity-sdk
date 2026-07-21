@@ -47,7 +47,7 @@ namespace BBBaseSdk
         public void Clear()
         {
             UserId = AccessToken = RefreshToken = null;
-            Provider = BBBaseProvider.Guest;
+            Provider = BBBaseProvider.Unknown;
             if (_persist)
             {
                 PlayerPrefs.DeleteKey(KeyUserId);
@@ -72,8 +72,10 @@ namespace BBBaseSdk
             UserId = PlayerPrefs.GetString(KeyUserId, "");
             AccessToken = PlayerPrefs.GetString(KeyAccess, "");
             RefreshToken = PlayerPrefs.GetString(KeyRefresh, "");
-            if (System.Enum.TryParse(PlayerPrefs.GetString(KeyProvider, "Guest"), out BBBaseProvider p))
+            if (System.Enum.TryParse(PlayerPrefs.GetString(KeyProvider, "Unknown"), out BBBaseProvider p))
                 Provider = p;
+            else
+                Provider = BBBaseProvider.Unknown;
         }
     }
 }
