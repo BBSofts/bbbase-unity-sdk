@@ -8,6 +8,9 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 /[Mm]emoryCaptures/
+# Unity 프로젝트로 열 때 생성되는 스캐폴딩(패키지 매니페스트/프로젝트 설정) — SDK 소스 아님
+/Packages/
+/ProjectSettings/
 .vs/
 *.csproj
 *.sln
