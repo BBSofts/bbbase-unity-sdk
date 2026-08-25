@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace BBBaseSdk
@@ -21,5 +22,12 @@ namespace BBBaseSdk
         /// <summary>분기 기준 — 항상 이 code 로 분기하라(message 는 사람용, 바뀔 수 있음).</summary>
         [JsonProperty("code")] public string Code;
         [JsonProperty("message")] public string Message;
+
+        /// <summary>
+        /// 코드별 부가 정보(없으면 null).
+        /// 예) USER_BANNED → {"expiresAt": "2026-08-27T...Z" 또는 null, "reason": "..."}
+        ///     IDENTITY_ALREADY_LINKED → {"conflictUserId": "...", "conflictLastLoginAt": "..."}
+        /// </summary>
+        [JsonProperty("details")] public Dictionary<string, object> Details;
     }
 }

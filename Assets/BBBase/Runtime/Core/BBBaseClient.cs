@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -15,8 +18,19 @@ namespace BBBaseSdk
     {
         private readonly BBBaseSettings _settings;
 
-        /// <summary>로그인 후 채워지는 게임유저 토큰(레코드 호출 시 Bearer 로 붙음).</summary>
-        public string AccessToken { get; set; }
+        /// <summary>로그인 후 채워지는 게임유저 토큰(레코드 호출 시 Bearer 로 붙음).
+        /// 새 토큰이 들어오면(=로그인 성공) 제재 래치를 푼다 — 기간제 제재가 만료된 뒤 다시
+        /// 로그인하면 같은 세션에서 Banned 를 또 받을 수 있어야 하기 때문.</summary>
+        public string AccessToken
+        {
+            get => _accessToken;
+            set
+            {
+                _accessToken = value;
+                if (!string.IsNullOrEmpty(value)) Interlocked.Exchange(ref _bannedNotified, 0);
+            }
+        }
+        private string _accessToken;
 
         /// <summary>401 시 액세스 토큰을 회전(refresh)하는 위임. 성공하면 true.
         /// 순환 생성을 피하려 생성자 대신 <see cref="SetAuthHandlers"/> 로 늦게 주입한다.</summary>
@@ -24,6 +38,14 @@ namespace BBBaseSdk
 
         /// <summary>refresh 마저 실패해 세션을 정리해야 할 때 호출되는 위임(세션 clear + 이벤트 방출).</summary>
         private Action _sessionExpiredHandler;
+
+        /// <summary>서버가 403 USER_BANNED 로 거절했을 때 호출되는 위임(expiresAt, reason).
+        /// expiresAt 이 null 이면 영구 제재.</summary>
+        private Action<DateTime?, string> _bannedHandler;
+
+        /// <summary>Banned 중복 방출 방지 래치. 동시에 여러 요청이 403 을 받아도 정지 안내는 한 번만
+        /// 띄워야 한다(refresh single-flight 와 같은 취지). 로그인 성공 시 해제된다.</summary>
+        private int _bannedNotified;
 
         /// <summary>refresh 단일화(single-flight)용 진행 중 작업. 동시에 여러 요청이 401 이 나도
         /// refresh 는 1번만 돈다(회전 토큰 stampede → 멀쩡한 세션 오인 로그아웃 방지).</summary>
@@ -33,10 +55,12 @@ namespace BBBaseSdk
         public BBBaseClient(BBBaseSettings settings) => _settings = settings;
 
         /// <summary>Init 시점에 401 자동 refresh / 세션 만료 처리기를 주입한다.</summary>
-        public void SetAuthHandlers(Func<Task<bool>> refreshHandler, Action sessionExpiredHandler)
+        public void SetAuthHandlers(Func<Task<bool>> refreshHandler, Action sessionExpiredHandler,
+            Action<DateTime?, string> bannedHandler = null)
         {
             _refreshHandler = refreshHandler;
             _sessionExpiredHandler = sessionExpiredHandler;
+            _bannedHandler = bannedHandler;
         }
 
         private void Log(string msg)
@@ -139,7 +163,10 @@ namespace BBBaseSdk
             {
                 var code = parsed?.Error?.Code ?? $"HTTP_{req.responseCode}";
                 var msg = parsed?.Error?.Message ?? $"요청 실패 ({req.responseCode})";
-                throw new BBBaseException(code, msg, req.responseCode, isNetworkError: false, rawBody: raw);
+                var details = parsed?.Error?.Details;
+                if (code == BBBaseErrorCodes.UserBanned) NotifyBanned(details);
+                throw new BBBaseException(code, msg, req.responseCode, isNetworkError: false, rawBody: raw,
+                    details: details);
             }
 
             // 성공 상태인데 본문이 비었거나(204 등) 파싱 불가면 기본값 반환
@@ -151,6 +178,34 @@ namespace BBBaseSdk
             }
 
             return parsed.Data;
+        }
+
+        /// <summary>
+        /// USER_BANNED 를 게임에 1회만 알린다. details.expiresAt 은 영구 제재면 null 로 오고,
+        /// 문자열이면 ISO 8601 UTC 로 파싱한다(파싱 실패 시 null = 영구로 보수적 처리하지 않고
+        /// 그대로 null 을 넘겨 게임이 "기간 불명"으로 다루게 한다).
+        /// </summary>
+        private void NotifyBanned(IReadOnlyDictionary<string, object> details)
+        {
+            if (_bannedHandler == null) return;
+            if (Interlocked.Exchange(ref _bannedNotified, 1) == 1) return; // 이미 알림
+
+            DateTime? expiresAt = null;
+            string reason = null;
+            if (details != null)
+            {
+                if (details.TryGetValue("expiresAt", out var rawExp) && rawExp != null &&
+                    DateTime.TryParse(rawExp.ToString(), CultureInfo.InvariantCulture,
+                        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var parsedExp))
+                {
+                    expiresAt = parsedExp;
+                }
+                if (details.TryGetValue("reason", out var rawReason) && rawReason != null)
+                    reason = rawReason.ToString();
+            }
+
+            Log($"USER_BANNED 수신 → Banned 방출 (expiresAt={(expiresAt.HasValue ? expiresAt.ToString() : "영구")})");
+            _bannedHandler(expiresAt, reason);
         }
     }
 }

@@ -39,6 +39,25 @@ namespace BBBaseSdk
         /// </summary>
         public static event Action<BBBaseProvider> SessionExpired;
 
+        /// <summary>
+        /// 운영자가 이 계정을 제재했을 때 방출(서버 403 USER_BANNED). 동시 요청이 여러 번 403 을
+        /// 받아도 한 번만 방출된다. expiresAt 이 null 이면 영구 제재이고, reason 은 운영자 메모(null 가능).
+        ///
+        /// 게임은 이 이벤트를 구독해 플레이를 중단하고 정지 안내를 띄운다 — 제재 집행은 서버가 하므로
+        /// (모든 요청이 403) 저장·랭킹·보상은 이미 막혀 있고, 화면 전환만 게임의 몫이다.
+        ///
+        /// SDK 는 토큰을 지우지 않는다: 서버가 제재 중에도 auth/me 는 열어두므로(계정 상태 조회용)
+        /// 세션을 지우면 그 조회 경로까지 막히고, 기간제 제재가 풀렸을 때 재로그인 없이 복구돼야 한다.
+        ///
+        /// <code>
+        /// BBBase.Banned += (expiresAt, reason) => {
+        ///     Time.timeScale = 0f;
+        ///     banPopup.Show(expiresAt, reason);   // expiresAt == null → 영구
+        /// };
+        /// </code>
+        /// </summary>
+        public static event Action<DateTime?, string> Banned;
+
         public static bool IsInitialized => _client != null;
 
         /// <summary>현재 로그인 상태(편의 접근자).</summary>
@@ -87,7 +106,8 @@ namespace BBBaseSdk
                 {
                     var provider = Auth.HandleSessionExpired();
                     SessionExpired?.Invoke(provider);
-                });
+                },
+                bannedHandler: (expiresAt, reason) => Banned?.Invoke(expiresAt, reason));
             Records = new BBBaseRecords(_client, _session);
             Leaderboards = new BBBaseLeaderboards(_client);
             Leagues = new BBBaseLeagues(_client, _session);

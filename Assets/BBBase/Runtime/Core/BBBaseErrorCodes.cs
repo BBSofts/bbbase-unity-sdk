@@ -23,6 +23,12 @@ namespace BBBaseSdk
         public const string LeaderboardScoreNotFound = "LEADERBOARD_SCORE_NOT_FOUND";
         public const string Unauthorized = "UNAUTHORIZED";
         public const string Forbidden = "FORBIDDEN";
+
+        /// <summary>
+        /// 운영자가 제재한 계정. 재시도·재로그인해도 계속 실패하므로 정지 안내를 띄운다.
+        /// 응답 details 의 expiresAt(null=영구)·reason 을 함께 보여줄 수 있다.
+        /// </summary>
+        public const string UserBanned = "USER_BANNED";
         public const string AuthProviderNotConfigured = "AUTH_PROVIDER_NOT_CONFIGURED";
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BBBaseSdk
 {
@@ -21,13 +22,21 @@ namespace BBBaseSdk
         /// <summary>서버가 돌려준 원문(envelope JSON 또는 빈 문자열).</summary>
         public string RawBody { get; }
 
-        public BBBaseException(string code, string message, long statusCode, bool isNetworkError, string rawBody)
+        /// <summary>
+        /// 서버 error.details(없으면 null). 코드별 부가 정보가 담긴다 —
+        /// USER_BANNED 면 expiresAt(영구 제재는 null)·reason 이 들어 있다.
+        /// </summary>
+        public IReadOnlyDictionary<string, object> Details { get; }
+
+        public BBBaseException(string code, string message, long statusCode, bool isNetworkError, string rawBody,
+            IReadOnlyDictionary<string, object> details = null)
             : base(message)
         {
             Code = code;
             StatusCode = statusCode;
             IsNetworkError = isNetworkError;
             RawBody = rawBody;
+            Details = details;
         }
 
         public override string ToString() =>
