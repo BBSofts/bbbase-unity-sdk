@@ -32,7 +32,7 @@ namespace BBBaseSdk
 
         /// <summary>
         /// 내 지난 사이클 결과(승급 연출)를 본 뒤 확인 처리(seen=true) — 다음 조회부터 안 뜨게.
-        /// 승급 애니메이션을 보여준 직후 호출한다.
+        /// 승급 애니메이션을 보여준 직후 호출한다. 게임유저 토큰을 함께 보낸다(범용 오버로드 참고).
         /// </summary>
         public Task<JObject> AcknowledgeResultAsync(string leagueId) =>
             AcknowledgeResultAsync(leagueId, RequireUserId());
@@ -72,11 +72,16 @@ namespace BBBaseSdk
             return await _client.SendProjectAsync<JToken>("GET", path);
         }
 
-        /// <summary>특정 엔티티의 지난 사이클 결과 확인 처리(seen=true). 결과가 없으면 no-op.</summary>
+        /// <summary>
+        /// 특정 엔티티의 지난 사이클 결과 확인 처리(seen=true). 결과가 없으면 no-op.
+        /// 로그인 상태면 게임유저 토큰(Authorization: Bearer)을 함께 보낸다 — 서버가 user 리그에서
+        /// 경로 entityId == 토큰 UserId 를 검사해 남의 결과를 확인 처리하지 못하게 한다(아니면 403 FORBIDDEN).
+        /// 로그인 전(토큰 없음)이면 헤더 없이 보낸다.
+        /// </summary>
         public async Task<JObject> AcknowledgeResultAsync(string leagueId, string entityId)
         {
             var path = $"/leagues/{Esc(leagueId)}/me/{Esc(entityId)}/ack";
-            return await _client.SendProjectAsync<JObject>("POST", path);
+            return await _client.SendProjectAsync<JObject>("POST", path, withUserToken: true);
         }
 
         private string RequireUserId()

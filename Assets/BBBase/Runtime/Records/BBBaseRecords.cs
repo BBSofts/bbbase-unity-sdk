@@ -28,6 +28,14 @@ namespace BBBaseSdk
         /// <summary>내 유저 레코드 저장. data 는 익명객체/Dictionary/직렬화 가능한 타입.</summary>
         public Task<JObject> SaveMineAsync(object data) => SaveAsync("user", RequireUserId(), data);
 
+        /// <summary>
+        /// 내 유저 레코드를 거래 ID 로 한 번만 저장. 같은 operationId + 같은 data 로 재시도하면
+        /// 서버가 다시 적용하지 않고 첫 결과를 돌려준다(INCREMENT 재화 중복 지급 방지).
+        /// operationId 는 전송 전에 영구 저장해 재시작 뒤에도 같은 값으로 재시도할 것.
+        /// </summary>
+        public Task<JObject> SaveMineOnceAsync(object data, string operationId) =>
+            SaveOnceAsync("user", RequireUserId(), data, operationId);
+
         /// <summary>내 유저 레코드 조회(없으면 null).</summary>
         public Task<JObject> LoadMineAsync() => LoadAsync("user", RequireUserId());
 
@@ -41,6 +49,16 @@ namespace BBBaseSdk
         {
             var path = $"/entities/{Esc(entityType)}/{Esc(entityId)}/record";
             return await _client.SendProjectAsync<JObject>("PUT", path, new { data }, withUserToken: true);
+        }
+
+        /// <summary>
+        /// 거래 ID 로 한 번만 적용되는 저장(PUT .../record/once). 같은 operationId 에 다른 data 를
+        /// 보내면 OPERATION_ID_CONFLICT(409). 병합된 레코드(재시도면 첫 결과)를 반환.
+        /// </summary>
+        public async Task<JObject> SaveOnceAsync(string entityType, string entityId, object data, string operationId)
+        {
+            var path = $"/entities/{Esc(entityType)}/{Esc(entityId)}/record/once";
+            return await _client.SendProjectAsync<JObject>("PUT", path, new { operationId, data }, withUserToken: true);
         }
 
         /// <summary>레코드 조회. 없으면 null(RECORD_NOT_FOUND 를 null 로 변환).</summary>

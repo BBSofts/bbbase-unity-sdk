@@ -29,6 +29,7 @@ namespace BBBaseSdk
         public static BBBaseMails Mails { get; private set; }
         public static BBBaseLogs Logs { get; private set; }
         public static BBBaseConfig Config { get; private set; }
+        public static BBBaseCounters Counters { get; private set; }
 
         /// <summary>
         /// 액세스·리프레시 토큰이 모두 만료돼 SDK 가 세션을 자동 정리했을 때 방출.
@@ -114,6 +115,7 @@ namespace BBBaseSdk
             Mails = new BBBaseMails(_client, _session);
             Logs = new BBBaseLogs(_client);
             Config = new BBBaseConfig(_client);
+            Counters = new BBBaseCounters(_client, _session);
 
             if (settings.verboseLogging)
                 Debug.Log($"[BBBase] initialized. env={settings.ActiveEnvironmentName}, " +

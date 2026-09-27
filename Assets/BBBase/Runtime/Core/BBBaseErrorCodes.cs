@@ -14,7 +14,10 @@ namespace BBBaseSdk
 
         // ── 서버 ──
         public const string UnknownColumn = "UNKNOWN_COLUMN";
+        /// <summary>user 외 entityType 인데 그 scope 의 스키마가 하나도 없음 — 운영자가 먼저 스키마를 정의해야 한다.</summary>
+        public const string UnknownEntityType = "UNKNOWN_ENTITY_TYPE";
         public const string DuplicateValue = "DUPLICATE_VALUE";
+        public const string OperationIdConflict = "OPERATION_ID_CONFLICT";
         public const string RecordNotFound = "RECORD_NOT_FOUND";
         public const string EntityRecordNotFound = "ENTITY_RECORD_NOT_FOUND";
         public const string ConfigNotFound = "CONFIG_NOT_FOUND";
@@ -30,5 +33,18 @@ namespace BBBaseSdk
         /// </summary>
         public const string UserBanned = "USER_BANNED";
         public const string AuthProviderNotConfigured = "AUTH_PROVIDER_NOT_CONFIGURED";
+
+        // ── 공유 카운터 ──
+        /// <summary>그런 이름의 카운터가 없음 — 운영자가 먼저 대시보드/CLI 로 등록해야 한다.</summary>
+        public const string CounterNotFound = "COUNTER_NOT_FOUND";
+
+        /// <summary>
+        /// 이 유저가 이번 구간에 더할 수 있는 총량을 다 썼다(429). 재시도하지 말고 UI 로 안내할 것 —
+        /// 다음 구간이 시작되기 전까지 계속 실패한다. 응답 details 에 perUserLimit / windowKey.
+        /// </summary>
+        public const string CounterLimitExceeded = "COUNTER_LIMIT_EXCEEDED";
+
+        /// <summary>delta 가 카운터의 maxDelta 를 넘었다(0·음수도 불가 — 카운터는 올라가기만 한다).</summary>
+        public const string InvalidCounterDelta = "INVALID_COUNTER_DELTA";
     }
 }
